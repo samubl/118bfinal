@@ -1,6 +1,30 @@
-function runKMeans(K,fileString)
-%load data file specified by fileStringfrom Bishop book
-X=load(fileString);
+function runKMeans(K, data, dataname)
+%load tBody and gBody data
+
+% split it into X and Y
+X = data(:,1:3);
+Y = data(:,4);
+
+% if we just want to explore dynamic vs stationary
+if (K == 2)
+    Y(Y<4) = 1;
+    Y(Y>3) = 2;
+end
+
+% plot the initial points
+ColorMat= [1 0 0;   
+            0 0 1;
+            0 1 0;   
+            1 0 1; 
+            0 1 1;
+            0 0 0;
+            1 1 0];
+% build color map
+colorVec = ColorMat((Y), :);
+scatter3(X(:,1),X(:,2),X(:,3),[],colorVec);
+xlabel('x'), ylabel('y'), zlabel('z')
+% save this clustering goal
+saveas(gcf,sprintf('%s_K_%d_goal.png',dataname, K))
 
 %determine and store data set information
 N=size(X,1);
@@ -35,22 +59,18 @@ for iter=1:maxiters
     Rnk=determineRnk(sqDmat);
     
     KmusOld=Kmus;
-    plotCurrent(X,Rnk,Kmus);
+    plotCurrent(X,Rnk,Kmus,0,dataname);
     pause(1)
     
     %recalculate mu values based on cluster assignments as per Bishop (9.4)
     Kmus=recalcMus(X,Rnk);
-    
-
-
-
 
     %check to see if the cluster centers have converged.  If so, break.
-    if sum(abs(KmusOld(:)-Kmus(:)))<1e-6
+    if sum(abs(KmusOld(:)-Kmus(:)))<1e-8
         disp(iter);
         break
     end
 end
 
-plotCurrent(X,Rnk,Kmus);
+plotCurrent(X,Rnk,Kmus,1,dataname);
 

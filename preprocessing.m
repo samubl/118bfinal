@@ -20,14 +20,14 @@
 function [tBody, gBody] = preprocessing(X_train_raw, y_train_raw)
     X_train = importdata(X_train_raw);
     Y_train = importdata(y_train_raw);
-    disp(size(X_train))
-    disp(size(Y_train))
+    %disp(size(X_train))
+    %disp(size(Y_train))
     fullSet = [X_train Y_train];
-    disp(size(fullSet))
+    %disp(size(fullSet))
     
 %     get important columns
     tBody = fullSet(:, [1,2,3, 562]);
-    disp(size(tBody))
+    % disp(size(tBody))
     gBody = fullSet(:, [121,122,123, 562]);
 % tBody is now the array with tBody means and the y label
 % gBody is now the array with gBody means and the y label
