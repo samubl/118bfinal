@@ -25,5 +25,5 @@ hold off;
 view(3), grid on
 xlabel('x'), ylabel('y'), zlabel('z')
 if (done == 1)
-    saveas(gcf,sprintf('%s_K_%d_result.png',dataname, K))
+    saveas(gcf,sprintf('./images/%s_K_%d_result.png',dataname, K))
 end

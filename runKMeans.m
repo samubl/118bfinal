@@ -1,4 +1,4 @@
-function runKMeans(K, data, dataname)
+function [numIter, act_cluster_distr]=runKMeans(K, data, dataname)
 %load tBody and gBody data
 
 % split it into X and Y
@@ -10,21 +10,6 @@ if (K == 2)
     Y(Y<4) = 1;
     Y(Y>3) = 2;
 end
-
-% plot the initial points
-ColorMat= [1 0 0;   
-            0 0 1;
-            0 1 0;   
-            1 0 1; 
-            0 1 1;
-            0 0 0;
-            1 1 0];
-% build color map
-colorVec = ColorMat((Y), :);
-scatter3(X(:,1),X(:,2),X(:,3),[],colorVec);
-xlabel('x'), ylabel('y'), zlabel('z')
-% save this clustering goal
-saveas(gcf,sprintf('%s_K_%d_goal.png',dataname, K))
 
 %determine and store data set information
 N=size(X,1);
@@ -39,6 +24,7 @@ Kmus=X(rndinds(1:K),:);
 
 %specify the maximum number of iterations to allow
 maxiters=1000;
+numIter = 0;
 
 for iter=1:maxiters
     %assign each data vector to closest mu vector as per Bishop (9.2)
@@ -59,18 +45,37 @@ for iter=1:maxiters
     Rnk=determineRnk(sqDmat);
     
     KmusOld=Kmus;
-    plotCurrent(X,Rnk,Kmus,0,dataname);
-    pause(1)
+    %plotCurrent(X,Rnk,Kmus,0,dataname);
+    %pause(1)
     
     %recalculate mu values based on cluster assignments as per Bishop (9.4)
     Kmus=recalcMus(X,Rnk);
 
     %check to see if the cluster centers have converged.  If so, break.
     if sum(abs(KmusOld(:)-Kmus(:)))<1e-8
-        disp(iter);
+        %disp(iter);
+        numIter = iter;
         break
     end
 end
 
 plotCurrent(X,Rnk,Kmus,1,dataname);
+
+%% error: needs K, Rnk, Y
+% intuition: for each cluster. establish the distribution of activity labels in that cluster to see how good it did
+% for that cluster, (the kth row of the kxk mtx), get the actual activity label (from Y at indx of Rnk mtx), and increase that value of kxk
+
+% init K by K mtx, where each row represents a cluster and each column represents an activity label
+act_cluster_distr = zeros(K,K);
+
+% for each datapoint in the Rnk mtx, find out what cluster it got put in, and it's actual activity label
+for row=1:N
+    act_label = Y(row);
+    clust = 1;
+    while (Rnk(row, clust) ~= 1)
+        clust = clust + 1;
+    end
+    % increase the count for this activity in this cluster
+    act_cluster_distr(clust, act_label) = act_cluster_distr(clust, act_label) + 1;
+end    
 
